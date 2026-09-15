@@ -53,6 +53,13 @@
   <p id="err"></p>
 
   <div id="results" style="display:none;">
+    <div class="setup" style="justify-content:center;">
+      <label style="align-self:center; color:var(--muted); font-size:0.9rem;">Filter Kelas:</label>
+      <select id="kelasFilter" onchange="applyFilter()" style="flex:1; min-width:180px; padding:9px 10px; border-radius:8px; border:1px solid var(--border); background:#20242c; color:var(--text); font-size:0.9rem;">
+        <option value="">Semua Kelas</option>
+      </select>
+    </div>
+
     <div class="overall">
       <div class="big" id="overallScore">-</div>
       <div class="cap">Rata-rata kepuasan umum (skala 1–5)</div>
@@ -107,6 +114,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function scoreColor(v){ return v>=4 ? '#22c55e' : (v>=3 ? '#d97706' : '#f97316'); }
 
+let allRows = [];
+
+function buildKelasFilter(rows){
+  const select = document.getElementById('kelasFilter');
+  const current = select.value;
+  const kelasUnik = [...new Set(rows.map(r => (r.kelas || '').trim()).filter(k => k))].sort();
+  select.innerHTML = '<option value="">Semua Kelas</option>' +
+    kelasUnik.map(k => `<option value="${k}">${k}</option>`).join('');
+  if(kelasUnik.includes(current)) select.value = current;
+}
+
+function applyFilter(){
+  const kelas = document.getElementById('kelasFilter').value;
+  const filtered = kelas ? allRows.filter(r => (r.kelas || '').trim() === kelas) : allRows;
+  render(filtered);
+}
+
 async function loadData(){
   const url = document.getElementById('endpointUrl').value.trim();
   const key = document.getElementById('accessKey').value.trim();
@@ -125,7 +149,9 @@ async function loadData(){
     const json = await res.json();
     loadingEl.style.display = 'none';
     if(json.error){ errEl.textContent = 'Akses ditolak. Cek kembali kata kunci.'; errEl.style.display='block'; return; }
-    render(json.rows || []);
+    allRows = json.rows || [];
+    buildKelasFilter(allRows);
+    render(allRows);
   }catch(e){
     loadingEl.style.display = 'none';
     errEl.textContent = 'Gagal memuat data. Cek URL Web App dan koneksi internet.';
