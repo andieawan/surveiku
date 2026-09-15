@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survei Kepuasan Belajar</title>
+<style>
+  :root{ --bg:#f4f6f8; --card:#fff; --text:#1f2937; --muted:#6b7280; --accent:#2563eb; --border:#e5e7eb; --ok:#16a34a; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Segoe UI', Roboto, -apple-system, sans-serif; background:var(--bg); color:var(--text); padding:24px 16px 60px;}
+  .wrap{max-width:640px; margin:0 auto;}
+  h1{font-size:1.4rem; margin-bottom:4px;}
+  .subtitle{color:var(--muted); font-size:0.92rem; margin-bottom:24px;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 20px 8px; margin-bottom:16px;}
+  .card h2{font-size:0.95rem; color:var(--accent); margin:0 0 14px; text-transform:uppercase; letter-spacing:.03em;}
+  .q{margin-bottom:20px;}
+  .q label{display:block; font-size:0.98rem; margin-bottom:10px; font-weight:500;}
+  .scale{display:flex; gap:6px;}
+  .scale button{flex:1; padding:10px 0; border-radius:8px; border:1px solid var(--border); background:#fff; cursor:pointer; font-size:0.95rem; font-weight:600; color:var(--muted);}
+  .scale button.selected{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .scale-labels{display:flex; justify-content:space-between; font-size:0.72rem; color:var(--muted); margin-top:4px;}
+  textarea, input[type=text]{width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--border); font-size:0.95rem; font-family:inherit; resize:vertical;}
+  .meta-row{display:flex; gap:10px;}
+  .meta-row .q{flex:1; margin-bottom:0;}
+  button.submit{width:100%; padding:14px; border:none; border-radius:10px; background:var(--accent); color:#fff; font-size:1rem; font-weight:600; cursor:pointer; margin-top:8px;}
+  button.submit:disabled{opacity:0.6; cursor:not-allowed;}
+  #thanks{display:none; text-align:center; padding:40px 20px; background:var(--card); border-radius:14px; border:1px solid var(--border);}
+  #thanks .check{font-size:2.4rem; color:var(--ok); margin-bottom:8px;}
+  .required{color:#dc2626;}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#0f1115; --card:#1a1d24; --text:#e5e7eb; --muted:#9ca3af; --accent:#3b82f6; --border:#2a2e37; }
+    .scale button{background:#20242c; color:var(--muted);}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📋 Survei Kepuasan Belajar</h1>
+  <p class="subtitle">Isian ini anonim. Jawaban jujur kamu membantu proses belajar-mengajar jadi lebih baik.</p>
+
+  <form id="surveyForm">
+    <div class="card">
+      <h2>Data Singkat (opsional)</h2>
+      <div class="meta-row">
+        <div class="q"><label>Kelas</label><input type="text" id="kelas" placeholder="mis. XI DKV 1"></div>
+        <div class="q"><label>Mata Pelajaran</label><input type="text" id="mapel" placeholder="mis. DKV / KIK"></div>
+      </div>
+    </div>
+
+    <div class="card"><h2>Penyampaian Materi</h2>
+      <div class="q" data-key="materi_mudah"><label>1. Materi yang disampaikan mudah dipahami <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+      <div class="q" data-key="contoh_relevan"><label>2. Penjelasan disertai contoh yang relevan <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+      <div class="q" data-key="kecepatan_pas"><label>3. Kecepatan mengajar sudah pas <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+    </div>
+
+    <div class="card"><h2>Interaksi &amp; Suasana Kelas</h2>
+      <div class="q" data-key="kesempatan_tanya"><label>4. Guru memberi kesempatan bertanya/berdiskusi <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+      <div class="q" data-key="respon_jelas"><label>5. Guru merespons pertanyaan dengan jelas <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+      <div class="q" data-key="suasana_nyaman"><label>6. Suasana kelas terasa nyaman untuk belajar <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+    </div>
+
+    <div class="card"><h2>Metode &amp; Media</h2>
+      <div class="q" data-key="metode_bantu"><label>7. Metode mengajar membantu pemahaman <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+      <div class="q" data-key="media_menarik"><label>8. Media pembelajaran menarik dan membantu <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+    </div>
+
+    <div class="card"><h2>Penilaian &amp; Umpan Balik</h2>
+      <div class="q" data-key="tugas_sesuai"><label>9. Tugas/ulangan sesuai dengan materi <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+      <div class="q" data-key="feedback_bantu"><label>10. Umpan balik nilai/tugas membantu perbaikan <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+    </div>
+
+    <div class="card"><h2>Kepuasan Umum</h2>
+      <div class="q" data-key="puas_umum"><label>11. Secara keseluruhan, seberapa puas kamu? <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak puas</span><span>Sangat puas</span></div></div>
+      <div class="q"><label>12. Apa yang paling kamu sukai dari cara mengajar guru ini?</label><textarea id="suka" rows="2"></textarea></div>
+      <div class="q"><label>13. Apa yang menurutmu perlu diperbaiki?</label><textarea id="saran" rows="2"></textarea></div>
+    </div>
+
+    <button type="submit" class="submit" id="submitBtn">Kirim Jawaban</button>
+  </form>
+
+  <div id="thanks">
+    <div class="check">✅</div>
+    <h2>Terima kasih!</h2>
+    <p style="color:var(--muted)">Jawabanmu sudah terkirim.</p>
+  </div>
+</div>
+
+<script>
+// ⚠️ GANTI dengan URL Web App Apps Script kamu (Code.gs) setelah deploy
+const ENDPOINT_URL = "PASTE_URL_WEB_APP_GAS_DI_SINI";
+
+const scaleQuestions = document.querySelectorAll('.q[data-key]');
+const answers = {};
+
+scaleQuestions.forEach(q => {
+  const key = q.dataset.key;
+  const scaleDiv = q.querySelector('.scale');
+  for(let i=1;i<=5;i++){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = i;
+    btn.addEventListener('click', () => {
+      answers[key] = i;
+      scaleDiv.querySelectorAll('button').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+    scaleDiv.appendChild(btn);
+  }
+});
+
+document.getElementById('surveyForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const requiredKeys = Array.from(scaleQuestions).map(q=>q.dataset.key);
+  const missing = requiredKeys.filter(k => !(k in answers));
+  if(missing.length > 0){
+    alert('Mohon isi semua pertanyaan skala (1-5) sebelum mengirim.');
+    return;
+  }
+
+  const payload = {
+    jenis: "mapel",
+    timestamp: new Date().toISOString(),
+    kelas: document.getElementById('kelas').value,
+    mapel: document.getElementById('mapel').value,
+    ...answers,
+    suka: document.getElementById('suka').value,
+    saran: document.getElementById('saran').value
+  };
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Mengirim...';
+
+  fetch(ENDPOINT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    document.getElementById('surveyForm').style.display = 'none';
+    document.getElementById('thanks').style.display = 'block';
+  }).catch(() => {
+    alert('Gagal mengirim. Cek koneksi internet lalu coba lagi.');
+    btn.disabled = false;
+    btn.textContent = 'Kirim Jawaban';
+  });
+});
+</script>
+</body>
+</html>

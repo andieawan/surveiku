@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survei Kepuasan terhadap Wali Kelas</title>
+<style>
+  :root{ --bg:#f4f6f8; --card:#fff; --text:#1f2937; --muted:#6b7280; --accent:#7c3aed; --border:#e5e7eb; --ok:#16a34a; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Segoe UI', Roboto, -apple-system, sans-serif; background:var(--bg); color:var(--text); padding:24px 16px 60px;}
+  .wrap{max-width:640px; margin:0 auto;}
+  h1{font-size:1.4rem; margin-bottom:4px;}
+  .subtitle{color:var(--muted); font-size:0.92rem; margin-bottom:24px;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 20px 8px; margin-bottom:16px;}
+  .card h2{font-size:0.95rem; color:var(--accent); margin:0 0 14px; text-transform:uppercase; letter-spacing:.03em;}
+  .q{margin-bottom:20px;}
+  .q label{display:block; font-size:0.98rem; margin-bottom:10px; font-weight:500;}
+  .scale{display:flex; gap:6px;}
+  .scale button{flex:1; padding:10px 0; border-radius:8px; border:1px solid var(--border); background:#fff; cursor:pointer; font-size:0.95rem; font-weight:600; color:var(--muted);}
+  .scale button.selected{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .scale-labels{display:flex; justify-content:space-between; font-size:0.72rem; color:var(--muted); margin-top:4px;}
+  textarea, input[type=text]{width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--border); font-size:0.95rem; font-family:inherit; resize:vertical;}
+  .meta-row{display:flex; gap:10px;}
+  .meta-row .q{flex:1; margin-bottom:0;}
+  button.submit{width:100%; padding:14px; border:none; border-radius:10px; background:var(--accent); color:#fff; font-size:1rem; font-weight:600; cursor:pointer; margin-top:8px;}
+  button.submit:disabled{opacity:0.6; cursor:not-allowed;}
+  #thanks{display:none; text-align:center; padding:40px 20px; background:var(--card); border-radius:14px; border:1px solid var(--border);}
+  #thanks .check{font-size:2.4rem; color:var(--ok); margin-bottom:8px;}
+  .required{color:#dc2626;}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#0f1115; --card:#1a1d24; --text:#e5e7eb; --muted:#9ca3af; --accent:#a78bfa; --border:#2a2e37; }
+    .scale button{background:#20242c; color:var(--muted);}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🏫 Survei Kepuasan terhadap Wali Kelas</h1>
+  <p class="subtitle">Isian ini anonim. Jawaban kamu membantu wali kelas memahami apa yang sudah baik dan apa yang perlu diperbaiki dalam membimbing kelas kita.</p>
+
+  <form id="surveyForm">
+    <div class="card">
+      <h2>Data Singkat (opsional)</h2>
+      <div class="meta-row"><div class="q"><label>Kelas</label><input type="text" id="kelas" placeholder="mis. XI DKV 1"></div></div>
+    </div>
+
+    <div class="card"><h2>Perhatian &amp; Kedekatan</h2>
+      <div class="q" data-key="perhatian_personal"><label>1. Wali kelas memperhatikan kondisi siswa secara personal <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+      <div class="q" data-key="mudah_dihubungi"><label>2. Wali kelas mudah dihubungi/didekati saat ada masalah <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+      <div class="q" data-key="mendengarkan"><label>3. Wali kelas mendengarkan pendapat/keluhan siswa <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+    </div>
+
+    <div class="card"><h2>Pengelolaan Kelas</h2>
+      <div class="q" data-key="penyelesaian_adil"><label>4. Wali kelas menyelesaikan masalah kelas dengan adil <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+      <div class="q" data-key="tangani_konflik"><label>5. Wali kelas menangani konflik antar siswa dengan baik <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+      <div class="q" data-key="suasana_kompak"><label>6. Wali kelas membantu menciptakan suasana kelas yang kompak &amp; nyaman <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+    </div>
+
+    <div class="card"><h2>Komunikasi &amp; Informasi</h2>
+      <div class="q" data-key="info_jelas"><label>7. Informasi (jadwal, tugas, kegiatan) disampaikan jelas &amp; tepat waktu <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+      <div class="q" data-key="motivasi_dukungan"><label>8. Wali kelas memberi motivasi/dukungan untuk belajar &amp; berkembang <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak setuju</span><span>Sangat setuju</span></div></div>
+    </div>
+
+    <div class="card"><h2>Kepuasan Umum</h2>
+      <div class="q" data-key="puas_umum"><label>9. Secara keseluruhan, seberapa puas kamu dengan wali kelas kita? <span class="required">*</span></label><div class="scale"></div><div class="scale-labels"><span>Sangat tidak puas</span><span>Sangat puas</span></div></div>
+      <div class="q"><label>10. Apa yang paling kamu sukai dari wali kelas kita?</label><textarea id="suka" rows="2"></textarea></div>
+      <div class="q"><label>11. Apa yang menurutmu perlu diperbaiki?</label><textarea id="saran" rows="2"></textarea></div>
+    </div>
+
+    <button type="submit" class="submit" id="submitBtn">Kirim Jawaban</button>
+  </form>
+
+  <div id="thanks">
+    <div class="check">✅</div>
+    <h2>Terima kasih!</h2>
+    <p style="color:var(--muted)">Jawabanmu sudah terkirim.</p>
+  </div>
+</div>
+
+<script>
+// ⚠️ GANTI dengan URL Web App Apps Script kamu (Code.gs) setelah deploy
+const ENDPOINT_URL = "PASTE_URL_WEB_APP_GAS_DI_SINI";
+
+const scaleQuestions = document.querySelectorAll('.q[data-key]');
+const answers = {};
+
+scaleQuestions.forEach(q => {
+  const key = q.dataset.key;
+  const scaleDiv = q.querySelector('.scale');
+  for(let i=1;i<=5;i++){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = i;
+    btn.addEventListener('click', () => {
+      answers[key] = i;
+      scaleDiv.querySelectorAll('button').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+    scaleDiv.appendChild(btn);
+  }
+});
+
+document.getElementById('surveyForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const requiredKeys = Array.from(scaleQuestions).map(q=>q.dataset.key);
+  const missing = requiredKeys.filter(k => !(k in answers));
+  if(missing.length > 0){
+    alert('Mohon isi semua pertanyaan skala (1-5) sebelum mengirim.');
+    return;
+  }
+
+  const payload = {
+    jenis: "walikelas",
+    timestamp: new Date().toISOString(),
+    kelas: document.getElementById('kelas').value,
+    ...answers,
+    suka: document.getElementById('suka').value,
+    saran: document.getElementById('saran').value
+  };
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Mengirim...';
+
+  fetch(ENDPOINT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    document.getElementById('surveyForm').style.display = 'none';
+    document.getElementById('thanks').style.display = 'block';
+  }).catch(() => {
+    alert('Gagal mengirim. Cek koneksi internet lalu coba lagi.');
+    btn.disabled = false;
+    btn.textContent = 'Kirim Jawaban';
+  });
+});
+</script>
+</body>
+</html>

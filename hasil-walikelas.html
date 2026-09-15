@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hasil Survei Kepuasan terhadap Wali Kelas</title>
+<style>
+  :root{ --bg:#0f1115; --card:#1a1d24; --text:#f3f4f6; --muted:#9ca3af; --accent:#3b82f6; --border:#2a2e37; --good:#22c55e; --good-bg:#14291d; --bad:#f97316; --bad-bg:#2b1f14; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Segoe UI', Roboto, -apple-system, sans-serif; background:var(--bg); color:var(--text); padding:24px 16px 60px;}
+  .wrap{max-width:900px; margin:0 auto;}
+  h1{font-size:1.6rem; text-align:center; margin-bottom:4px;}
+  .subtitle{color:var(--muted); text-align:center; margin-bottom:20px;}
+  .setup{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 18px; margin-bottom:22px; display:flex; gap:10px; flex-wrap:wrap;}
+  .setup input{flex:1; min-width:200px; padding:9px 10px; border-radius:8px; border:1px solid var(--border); background:#20242c; color:var(--text); font-size:0.9rem;}
+  .setup button{padding:9px 18px; border:none; border-radius:8px; background:var(--accent); color:#fff; font-weight:600; cursor:pointer;}
+  .overall{text-align:center; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; margin-bottom:22px;}
+  .overall .big{font-size:2.6rem; font-weight:800; color:var(--accent);}
+  .overall .cap{color:var(--muted); font-size:0.9rem; margin-top:4px;}
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:22px;}
+  @media (max-width:680px){ .cols{grid-template-columns:1fr;} }
+  .col-title{font-size:1rem; font-weight:700; margin-bottom:10px;}
+  .item{border-radius:12px; padding:12px 16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;}
+  .item.good{background:var(--good-bg); border:1px solid var(--good);}
+  .item.bad{background:var(--bad-bg); border:1px solid var(--bad);}
+  .item .score{font-weight:800;}
+  .item.good .score{color:var(--good);}
+  .item.bad .score{color:var(--bad);}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:16px;}
+  .card h2{font-size:1rem; margin:0 0 12px;}
+  .bar-row{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:0.85rem;}
+  .bar-row .q-label{width:180px; flex-shrink:0;}
+  .bar-track{flex:1; background:#20242c; border-radius:6px; height:16px; overflow:hidden;}
+  .bar-fill{height:100%; border-radius:6px;}
+  .bar-score{width:36px; text-align:right; font-weight:600; flex-shrink:0;}
+  .comment{padding:8px 10px; background:#20242c; border-radius:8px; margin-bottom:6px; font-size:0.88rem;}
+  #err{color:var(--bad); text-align:center; display:none; margin-bottom:16px;}
+  #loading{color:var(--muted); text-align:center; display:none; margin-bottom:16px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📊 Hasil Survei Kepuasan terhadap Wali Kelas</h1>
+  <p class="subtitle" id="countText">Isi URL Web App dan kata kunci akses untuk melihat hasil</p>
+
+  <div class="setup">
+    <input type="text" id="endpointUrl" placeholder="URL Web App Google Apps Script">
+    <input type="text" id="accessKey" placeholder="Kata Kunci Akses">
+    <button onclick="loadData()">Tampilkan Hasil</button>
+  </div>
+
+  <p id="loading">Memuat data...</p>
+  <p id="err"></p>
+
+  <div id="results" style="display:none;">
+    <div class="overall">
+      <div class="big" id="overallScore">-</div>
+      <div class="cap">Rata-rata kepuasan umum (skala 1–5)</div>
+    </div>
+
+    <div class="cols">
+      <div><div class="col-title">✅ Paling Disukai</div><div id="topGood"></div></div>
+      <div><div class="col-title">🎯 Perlu Diperbaiki</div><div id="topBad"></div></div>
+    </div>
+
+    <div class="card">
+      <h2>Rata-rata Skor per Pertanyaan</h2>
+      <div id="barChart"></div>
+    </div>
+
+    <div class="card">
+      <h2>💬 Yang disukai siswa</h2>
+      <div id="sukaList"></div>
+    </div>
+
+    <div class="card">
+      <h2>📝 Saran perbaikan dari siswa</h2>
+      <div id="saranList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTION_LABELS = {
+  perhatian_personal: "Perhatian personal",
+  mudah_dihubungi: "Mudah dihubungi",
+  mendengarkan: "Mendengarkan keluhan",
+  penyelesaian_adil: "Penyelesaian adil",
+  tangani_konflik: "Menangani konflik",
+  suasana_kompak: "Suasana kompak",
+  info_jelas: "Info jelas & tepat waktu",
+  motivasi_dukungan: "Motivasi & dukungan",
+  puas_umum: "Kepuasan umum"
+};
+
+// Muat URL & kata kunci tersimpan di perangkat ini (kalau ada)
+window.addEventListener('DOMContentLoaded', () => {
+  try{
+    const savedUrl = localStorage.getItem('survei_walikelas_url');
+    const savedKey = localStorage.getItem('survei_walikelas_key');
+    if(savedUrl) document.getElementById('endpointUrl').value = savedUrl;
+    if(savedKey) document.getElementById('accessKey').value = savedKey;
+  }catch(e){}
+});
+
+function scoreColor(v){ return v>=4 ? '#22c55e' : (v>=3 ? '#d97706' : '#f97316'); }
+
+async function loadData(){
+  const url = document.getElementById('endpointUrl').value.trim();
+  const key = document.getElementById('accessKey').value.trim();
+  const errEl = document.getElementById('err');
+  const loadingEl = document.getElementById('loading');
+  errEl.style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  if(!url || !key){ errEl.textContent = 'Isi URL Web App dan kata kunci akses terlebih dahulu.'; errEl.style.display='block'; return; }
+
+  try{ localStorage.setItem('survei_walikelas_url', url); localStorage.setItem('survei_walikelas_key', key); }catch(e){}
+
+  loadingEl.style.display = 'block';
+  try{
+    const sep = url.includes('?') ? '&' : '?';
+    const res = await fetch(url + sep + 'jenis=walikelas&key=' + encodeURIComponent(key));
+    const json = await res.json();
+    loadingEl.style.display = 'none';
+    if(json.error){ errEl.textContent = 'Akses ditolak. Cek kembali kata kunci.'; errEl.style.display='block'; return; }
+    render(json.rows || []);
+  }catch(e){
+    loadingEl.style.display = 'none';
+    errEl.textContent = 'Gagal memuat data. Cek URL Web App dan koneksi internet.';
+    errEl.style.display = 'block';
+  }
+}
+
+function render(rows){
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('countText').textContent = rows.length + ' siswa telah mengisi survei ini';
+
+  const scored = Object.keys(QUESTION_LABELS).map(key => {
+    const values = rows.map(r => Number(r[key])).filter(v => !isNaN(v) && v > 0);
+    const avg = values.length ? values.reduce((a,b)=>a+b,0)/values.length : 0;
+    return { key, label: QUESTION_LABELS[key], avg };
+  });
+
+  const puas = scored.find(s => s.key === 'puas_umum');
+  document.getElementById('overallScore').textContent = puas ? puas.avg.toFixed(2) + ' / 5' : '-';
+
+  const others = scored.filter(s => s.key !== 'puas_umum');
+  const sorted = [...others].sort((a,b) => b.avg - a.avg);
+  document.getElementById('topGood').innerHTML = sorted.slice(0,3).map(s => `<div class="item good"><span>${s.label}</span><span class="score">${s.avg.toFixed(1)}</span></div>`).join('');
+  document.getElementById('topBad').innerHTML = sorted.slice(-3).reverse().map(s => `<div class="item bad"><span>${s.label}</span><span class="score">${s.avg.toFixed(1)}</span></div>`).join('');
+
+  const barChart = document.getElementById('barChart');
+  barChart.innerHTML = '';
+  scored.forEach(s => {
+    const pct = (s.avg/5*100).toFixed(0);
+    const color = scoreColor(s.avg);
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `<div class="q-label">${s.label}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${color};"></div></div><div class="bar-score" style="color:${color}">${s.avg.toFixed(2)}</div>`;
+    barChart.appendChild(row);
+  });
+
+  const sukaList = document.getElementById('sukaList');
+  const saranList = document.getElementById('saranList');
+  sukaList.innerHTML = '';
+  saranList.innerHTML = '';
+  rows.forEach(r => {
+    if(r.suka && String(r.suka).trim()){ const d=document.createElement('div'); d.className='comment'; d.textContent=r.suka; sukaList.appendChild(d); }
+    if(r.saran && String(r.saran).trim()){ const d=document.createElement('div'); d.className='comment'; d.textContent=r.saran; saranList.appendChild(d); }
+  });
+  if(!sukaList.children.length) sukaList.innerHTML = '<div class="comment" style="color:var(--muted)">Belum ada komentar.</div>';
+  if(!saranList.children.length) saranList.innerHTML = '<div class="comment" style="color:var(--muted)">Belum ada komentar.</div>';
+}
+</script>
+</body>
+</html>
